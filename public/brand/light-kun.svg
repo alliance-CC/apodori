@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 300" width="240" height="300" role="img" aria-label="ライトくん">
+  <defs>
+    <linearGradient id="roof" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FF8A3D"/>
+      <stop offset="1" stop-color="#EE5E12"/>
+    </linearGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFD23E"/>
+      <stop offset="1" stop-color="#FFB81C"/>
+    </linearGradient>
+    <linearGradient id="face" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F79A4A"/>
+      <stop offset="1" stop-color="#EE7E2E"/>
+    </linearGradient>
+    <radialGradient id="cheek" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#FF7E6B" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#FF7E6B" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- tail -->
+  <path d="M168 250 C 205 250 214 270 210 286" fill="none" stroke="#EE7E2E" stroke-width="11" stroke-linecap="round"/>
+  <circle cx="211" cy="288" r="11" fill="#FFD23E"/>
+
+  <!-- legs / feet -->
+  <ellipse cx="98" cy="285" rx="20" ry="13" fill="#EE7E2E"/>
+  <ellipse cx="146" cy="285" rx="20" ry="13" fill="#EE7E2E"/>
+
+  <!-- body (yellow house onesie) -->
+  <path d="M70 200 Q70 188 86 186 L154 186 Q170 188 170 200 L172 256 Q172 282 120 282 Q68 282 68 256 Z" fill="url(#body)"/>
+  <ellipse cx="120" cy="240" rx="30" ry="34" fill="#FFE08A" opacity="0.6"/>
+
+  <!-- right arm down -->
+  <path d="M162 214 C 184 224 196 244 192 258" fill="none" stroke="#EE7E2E" stroke-width="20" stroke-linecap="round"/>
+  <circle cx="191" cy="258" r="14" fill="#F79A4A"/>
+
+  <!-- left arm waving -->
+  <path d="M80 214 C 58 198 46 170 50 150" fill="none" stroke="#EE7E2E" stroke-width="20" stroke-linecap="round"/>
+  <circle cx="49" cy="148" r="16" fill="#F79A4A"/>
+
+  <!-- roof (house hat) -->
+  <path d="M120 20 L214 96 Q218 100 212 104 L28 104 Q22 100 26 96 Z" fill="url(#roof)"/>
+  <path d="M120 20 L214 96 Q218 100 212 104 L120 104 Z" fill="#000000" opacity="0.06"/>
+  <rect x="26" y="100" width="188" height="12" rx="6" fill="#D9540F"/>
+
+  <!-- ears peeking -->
+  <circle cx="74" cy="116" r="13" fill="#EE7E2E"/>
+  <circle cx="166" cy="116" r="13" fill="#EE7E2E"/>
+
+  <!-- house front (yellow wall framing face) -->
+  <rect x="50" y="104" width="140" height="118" rx="34" fill="url(#body)"/>
+
+  <!-- face -->
+  <rect x="66" y="116" width="108" height="100" rx="42" fill="url(#face)"/>
+
+  <!-- cheeks -->
+  <circle cx="88" cy="178" r="14" fill="url(#cheek)"/>
+  <circle cx="152" cy="178" r="14" fill="url(#cheek)"/>
+
+  <!-- eyebrows -->
+  <path d="M84 144 q10 -7 20 -1" fill="none" stroke="#C75A1B" stroke-width="4" stroke-linecap="round"/>
+  <path d="M136 143 q10 -6 20 1" fill="none" stroke="#C75A1B" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- eyes -->
+  <ellipse cx="98" cy="160" rx="9.5" ry="12" fill="#23201E"/>
+  <ellipse cx="142" cy="160" rx="9.5" ry="12" fill="#23201E"/>
+  <circle cx="95" cy="155" r="3" fill="#fff"/>
+  <circle cx="139" cy="155" r="3" fill="#fff"/>
+
+  <!-- muzzle -->
+  <ellipse cx="120" cy="190" rx="30" ry="22" fill="#FFE8C9"/>
+  <path d="M111 182 q9 9 18 0" fill="none" stroke="#5A3A22" stroke-width="3.2" stroke-linecap="round"/>
+  <ellipse cx="120" cy="182" rx="7.5" ry="5.5" fill="#3A2A20"/>
+  <path d="M120 187 v6" stroke="#5A3A22" stroke-width="3" stroke-linecap="round"/>
+  <path d="M120 193 q-7 7 -13 3" fill="none" stroke="#5A3A22" stroke-width="3" stroke-linecap="round"/>
+  <path d="M120 193 q7 7 13 3" fill="none" stroke="#5A3A22" stroke-width="3" stroke-linecap="round"/>
+  <path d="M114 198 q6 5 12 0" fill="#FF8FA0"/>
+</svg>

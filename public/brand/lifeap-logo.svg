@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 372 96" width="372" height="96" role="img" aria-label="LIFE AP">
+  <defs>
+    <linearGradient id="ogL" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FF8330"/>
+      <stop offset="0.55" stop-color="#F2570C"/>
+      <stop offset="1" stop-color="#C7440A"/>
+    </linearGradient>
+  </defs>
+  <!-- mark -->
+  <g transform="translate(4,4) scale(0.917)">
+    <rect x="8" y="8" width="80" height="80" rx="22" fill="url(#ogL)"/>
+    <path d="M48 22 L70 47 L58 47 L58 74 L38 74 L38 47 L26 47 Z" fill="#15151A"/>
+    <path d="M22 18 Q48 8 74 18" stroke="#ffffff" stroke-opacity="0.4" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </g>
+  <!-- wordmark -->
+  <text x="108" y="62" font-family="Arial, Helvetica, sans-serif" font-size="48" font-weight="800" letter-spacing="1.5" fill="#F6F6F7">LIFE<tspan fill="#FF6A13"> AP</tspan></text>
+</svg>

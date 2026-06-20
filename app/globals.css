@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #0b0b0e;
+  --foreground: #f6f6f7;
+  /* Use Inter if present locally, otherwise fall through to the JP stack. */
+  --font-inter: "Inter", "Helvetica Neue", Arial;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Scrollbar — black/orange */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #121216;
+}
+::-webkit-scrollbar-thumb {
+  background: #33333d;
+  border-radius: 8px;
+  border: 2px solid #121216;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #f2570c;
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-ink-700/70 bg-ink-900/70 backdrop-blur-sm shadow-card;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply btn bg-brand-gradient text-white hover:brightness-110 shadow-glow;
+  }
+  .btn-ghost {
+    @apply btn border border-ink-700 bg-ink-800/60 text-ink-100 hover:bg-ink-700/60;
+  }
+  .btn-danger {
+    @apply btn border border-red-500/40 bg-red-500/10 text-red-300 hover:bg-red-500/20;
+  }
+  .input {
+    @apply w-full rounded-xl border border-ink-700 bg-ink-950/60 px-3 py-2 text-sm text-ink-50 placeholder:text-ink-400 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30;
+  }
+  .label {
+    @apply mb-1.5 block text-xs font-medium text-ink-300;
+  }
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-lg border border-ink-700 bg-ink-800/60 px-2.5 py-1 text-xs text-ink-200;
+  }
+  .stat-card {
+    @apply card relative overflow-hidden p-5;
+  }
+}
+
+/* Recharts dark tweaks */
+.recharts-cartesian-axis-tick-value {
+  fill: #a0a0ab;
+  font-size: 12px;
+}
+.recharts-default-tooltip {
+  border-radius: 12px !important;
+  border: 1px solid #33333d !important;
+  background: #121216 !important;
+}
+.recharts-tooltip-label {
+  color: #f6f6f7 !important;
+}

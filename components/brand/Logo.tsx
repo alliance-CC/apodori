@@ -1,8 +1,9 @@
 import clsx from "clsx";
+import { BRAND } from "@/lib/brand";
 
 /**
- * LIFE AP ロゴ。公式アセットへの差し替えは /public/brand/ のファイルを
- * 置き換えるだけで完了します（コード変更不要）。SVG は背景透過です。
+ * LIFE AP ロゴ。公式アセットへの差し替えは public/brand/raw/ に画像を置いて
+ * `npm run brand:transparent` を実行するだけ（背景透過＋自動配線）。
  */
 export function Logo({
   variant = "full",
@@ -11,8 +12,7 @@ export function Logo({
   variant?: "full" | "mark";
   className?: string;
 }) {
-  const src =
-    variant === "mark" ? "/brand/lifeap-mark.svg" : "/brand/lifeap-logo.svg";
+  const src = variant === "mark" ? BRAND.mark : BRAND.logo;
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img

@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { Badge, PageHeader, GuideBanner } from "@/components/ui";
+import { useSort, SortHeader } from "@/components/table";
 import { replyClassLabel, fmtDateTime, targetStatusLabel } from "@/lib/utils";
 
 const classTone: Record<string, "green" | "yellow" | "red" | "blue"> = {
@@ -27,6 +28,12 @@ export default function ActivitiesPage() {
     deal: state.targets.filter((t) => t.status === "deal").length,
     ng: state.targets.filter((t) => ["ng", "excluded"].includes(t.status)).length,
   };
+
+  const activityRows = state.activities.map((a) => {
+    const t = state.targets.find((x) => x.id === a.targetId);
+    return { ...a, companyName: t?.companyName ?? "", storeName: t?.storeName ?? "" };
+  });
+  const { sorted, sort, toggle } = useSort(activityRows, { key: "createdAt", dir: "desc" });
 
   return (
     <div className="animate-fade-in">
@@ -102,21 +109,20 @@ export default function ActivitiesPage() {
           <table className="w-full min-w-[720px] text-sm">
             <thead>
               <tr className="border-b border-ink-800 text-left text-xs text-ink-400">
-                <th className="px-4 py-3 font-medium">企業 / 店舗</th>
-                <th className="px-4 py-3 font-medium">ステータス</th>
-                <th className="px-4 py-3 font-medium">パターン</th>
-                <th className="px-4 py-3 font-medium">送信日時</th>
+                <SortHeader label="企業 / 店舗" sortKey="companyName" sort={sort} onSort={toggle} />
+                <SortHeader label="ステータス" sortKey="status" sort={sort} onSort={toggle} />
+                <SortHeader label="パターン" sortKey="variant" sort={sort} onSort={toggle} />
+                <SortHeader label="送信日時" sortKey="sentAt" sort={sort} onSort={toggle} />
                 <th className="px-4 py-3 font-medium">開封 / 返信</th>
               </tr>
             </thead>
             <tbody>
-              {state.activities.map((a) => {
-                const t = state.targets.find((x) => x.id === a.targetId);
+              {sorted.map((a) => {
                 return (
-                  <tr key={a.id} className="border-b border-ink-800/60 last:border-0 hover:bg-ink-800/30">
+                  <tr key={a.id} className="border-b border-ink-800/60 transition-colors last:border-0 hover:bg-ink-800/40">
                     <td className="px-4 py-3">
-                      <div className="text-ink-100">{t?.companyName}</div>
-                      <div className="text-xs text-ink-400">{t?.storeName}</div>
+                      <div className="text-ink-100">{a.companyName}</div>
+                      <div className="text-xs text-ink-400">{a.storeName}</div>
                     </td>
                     <td className="px-4 py-3">
                       <Badge tone={a.status === "blocked" ? "red" : a.status === "replied" ? "yellow" : a.status === "opened" ? "blue" : "green"}>

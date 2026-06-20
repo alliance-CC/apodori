@@ -29,6 +29,21 @@ export default function HomePage() {
   const dealsCount = state.deals.length;
   const activeExclusions = state.exclusions.filter((e) => e.isActive).length;
 
+  // トレンド（直近7日 vs 前7日）とスパークライン
+  const sentSeries = state.kpi.map((k) => k.sent);
+  const openedSeries = state.kpi.map((k) => k.opened);
+  const repliedSeries = state.kpi.map((k) => k.replied);
+  const dealsSeries = state.kpi.map((k) => k.deals);
+  const last7 = state.kpi.slice(-7);
+  const prev7 = state.kpi.slice(-14, -7);
+  const sumBy = (arr: typeof state.kpi, key: "sent" | "opened" | "replied" | "deals") =>
+    arr.reduce((a, k) => a + k[key], 0);
+  const pctChange = (a: number, b: number) =>
+    b > 0 ? Math.round(((a - b) / b) * 100) : a > 0 ? 100 : 0;
+  const hasTrend = state.kpi.length >= 8;
+  const d = (key: "sent" | "opened" | "replied" | "deals") =>
+    hasTrend ? pctChange(sumBy(last7, key), sumBy(prev7, key)) : undefined;
+
   const statusCounts = state.targets.reduce<Record<string, number>>((acc, t) => {
     acc[t.status] = (acc[t.status] || 0) + 1;
     return acc;
@@ -52,10 +67,10 @@ export default function HomePage() {
       </GuideBanner>
 
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <StatCard label="送信数（14日間）" value={sent.toLocaleString()} sub="メール配信の合計" accent />
-        <StatCard label="開封率" value={pct(opened, sent)} sub={`${opened} 件開封`} />
-        <StatCard label="返信率" value={pct(replied, sent)} sub={`${replied} 件返信`} />
-        <StatCard label="獲得商談" value={dealsCount} sub="アポイント確定" accent />
+        <StatCard label="送信数（14日間）" value={sent.toLocaleString()} sub="メール配信の合計" accent delta={d("sent")} spark={sentSeries} />
+        <StatCard label="開封率" value={pct(opened, sent)} sub={`${opened} 件開封`} delta={d("opened")} spark={openedSeries} />
+        <StatCard label="返信率" value={pct(replied, sent)} sub={`${replied} 件返信`} delta={d("replied")} spark={repliedSeries} />
+        <StatCard label="獲得商談" value={dealsCount} sub="アポイント確定" accent delta={d("deals")} spark={dealsSeries} />
       </div>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-3">

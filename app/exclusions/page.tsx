@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { Badge, PageHeader, GuideBanner } from "@/components/ui";
+import { useSort, SortHeader } from "@/components/table";
 import { exclusionTypeLabel, fmtDateTime } from "@/lib/utils";
 import type { ExclusionType } from "@/lib/types";
 
@@ -65,6 +66,8 @@ export default function ExclusionsPage() {
       return true;
     });
   }, [state.exclusions, q, filter, showActive]);
+
+  const { sorted, sort, toggle } = useSort(filtered, { key: "updatedAt", dir: "desc" });
 
   const activeCount = state.exclusions.filter((e) => e.isActive).length;
 
@@ -272,18 +275,18 @@ export default function ExclusionsPage() {
           <table className="w-full min-w-[760px] text-sm">
             <thead>
               <tr className="border-b border-ink-800 text-left text-xs text-ink-400">
-                <th className="px-4 py-3 font-medium">法人名 / 店舗</th>
-                <th className="px-4 py-3 font-medium">種別</th>
+                <SortHeader label="法人名 / 店舗" sortKey="companyName" sort={sort} onSort={toggle} />
+                <SortHeader label="種別" sortKey="type" sort={sort} onSort={toggle} />
                 <th className="px-4 py-3 font-medium">連絡先</th>
-                <th className="px-4 py-3 font-medium">由来</th>
+                <SortHeader label="由来" sortKey="source" sort={sort} onSort={toggle} />
                 <th className="px-4 py-3 font-medium">理由</th>
-                <th className="px-4 py-3 font-medium">更新</th>
-                <th className="px-4 py-3 font-medium text-right">操作</th>
+                <SortHeader label="更新" sortKey="updatedAt" sort={sort} onSort={toggle} />
+                <th className="px-4 py-3 text-right font-medium">操作</th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map((e) => (
-                <tr key={e.id} className="border-b border-ink-800/60 last:border-0 hover:bg-ink-800/30">
+              {sorted.map((e) => (
+                <tr key={e.id} className="border-b border-ink-800/60 transition-colors last:border-0 hover:bg-ink-800/40">
                   <td className="px-4 py-3">
                     <div className="font-medium text-ink-50">{e.companyName}</div>
                     {e.storeName && <div className="text-xs text-ink-400">{e.storeName}</div>}

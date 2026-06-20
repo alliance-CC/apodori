@@ -58,9 +58,9 @@ export default function AnalyticsPage() {
       </GuideBanner>
 
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <StatCard label="開封率" value={pct(opened, sent)} sub={`${opened} / ${sent}`} accent />
-        <StatCard label="返信率" value={pct(replied, sent)} sub={`${replied} / ${sent}`} />
-        <StatCard label="商談獲得率" value={pct(deals, sent)} sub={`${deals} / ${sent}`} accent />
+        <StatCard label="開封率" value={pct(opened, sent)} sub={`${opened} / ${sent}`} accent spark={state.kpi.map((k) => k.opened)} />
+        <StatCard label="返信率" value={pct(replied, sent)} sub={`${replied} / ${sent}`} spark={state.kpi.map((k) => k.replied)} />
+        <StatCard label="商談獲得率" value={pct(deals, sent)} sub={`${deals} / ${sent}`} accent spark={state.kpi.map((k) => k.deals)} />
         <StatCard label="返信→商談" value={pct(deals, replied)} sub="返信からの転換率" />
       </div>
 

@@ -156,7 +156,7 @@ export default function CampaignsPage() {
           const deals = targets.filter((t) => t.status === "deal").length;
           const excluded = targets.filter((t) => t.status === "excluded").length;
           return (
-            <div key={c.id} className="card p-5">
+            <div key={c.id} className="card card-hover p-5">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">

@@ -21,26 +21,66 @@ export function Badge({
   return <span className={clsx("badge", tones[tone], className)}>{children}</span>;
 }
 
+/** 軽量なインラインSVGスパークライン（KPIカード用） */
+export function Sparkline({ data, className }: { data: number[]; className?: string }) {
+  if (!data || data.length < 2) return null;
+  const w = 100;
+  const h = 28;
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+  const pts = data.map((v, i) => {
+    const x = (i / (data.length - 1)) * w;
+    const y = h - ((v - min) / range) * (h - 4) - 2;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  });
+  const line = `M${pts.join(" L")}`;
+  const area = `${line} L${w},${h} L0,${h} Z`;
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className={className} aria-hidden>
+      <path d={area} fill="#FF6A13" fillOpacity="0.12" />
+      <path d={line} fill="none" stroke="#FF6A13" strokeWidth="2" vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function StatCard({
   label,
   value,
   sub,
   accent = false,
+  delta,
+  spark,
 }: {
   label: string;
   value: React.ReactNode;
   sub?: React.ReactNode;
   accent?: boolean;
+  delta?: number;
+  spark?: number[];
 }) {
+  const hasDelta = typeof delta === "number" && Number.isFinite(delta);
+  const up = (delta ?? 0) >= 0;
   return (
     <div className="stat-card">
-      {accent && (
-        <div className="absolute inset-x-0 top-0 h-0.5 bg-brand-gradient" />
-      )}
-      <p className="text-xs font-medium text-ink-400">{label}</p>
-      <p className="mt-2 text-2xl font-bold tracking-tight text-ink-50 sm:text-3xl">
-        {value}
-      </p>
+      {accent && <div className="absolute inset-x-0 top-0 h-0.5 bg-brand-gradient" />}
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-xs font-medium text-ink-400">{label}</p>
+        {hasDelta && (
+          <span
+            className={clsx(
+              "inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[11px] font-semibold",
+              up ? "bg-emerald-500/15 text-emerald-300" : "bg-red-500/15 text-red-300"
+            )}
+            title="直近7日 vs 前7日"
+          >
+            {up ? "▲" : "▼"}
+            {Math.abs(delta as number)}%
+          </span>
+        )}
+      </div>
+      <p className="mt-2 text-2xl font-bold tracking-tight text-ink-50 sm:text-3xl">{value}</p>
+      {spark && spark.length > 1 && <Sparkline data={spark} className="mt-2 h-7 w-full" />}
       {sub && <p className="mt-1 text-xs text-ink-400">{sub}</p>}
     </div>
   );

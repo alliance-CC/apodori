@@ -19,16 +19,21 @@ import path from "node:path";
 const RAW_DIR = "public/brand/raw";
 const OUT_DIR = "public/brand";
 
+// darkMode: 黒テーマで見えるよう、暗い色（濃いグレーの文字等）を明色へ寄せる
+// （オレンジのブランドカラーは保持）。ロゴ・マークに適用。
 const ASSETS = [
-  { match: /^(lifeap[-_]?logo|logo)\.(png|jpe?g|webp)$/i, out: "lifeap-logo.png", key: "logo" },
-  { match: /^(lifeap[-_]?mark|mark)\.(png|jpe?g|webp)$/i, out: "lifeap-mark.png", key: "mark" },
-  { match: /^(light[-_]?kun|lightkun|character|mascot|chara)\.(png|jpe?g|webp)$/i, out: "light-kun.png", key: "lightKun" },
+  { match: /^(lifeap[-_]?logo|logo)\.(png|jpe?g|webp)$/i, out: "lifeap-logo.png", key: "logo", darkMode: true },
+  { match: /^(lifeap[-_]?mark|mark)\.(png|jpe?g|webp)$/i, out: "lifeap-mark.png", key: "mark", darkMode: true },
+  { match: /^(light[-_]?kun|lightkun|character|mascot|chara)\.(png|jpe?g|webp)$/i, out: "light-kun.png", key: "lightKun", darkMode: false },
 ];
 
 // 白とみなす閾値（背景が純白に近いほど安全に除去）
 const WHITE = 236;
 
-async function removeBackground(inputPath, outPath) {
+// ブランドオレンジ判定（recolor時に保持する）
+const isOrange = (r, g, b) => r > 165 && g > 55 && g < 190 && b < 115 && r - b > 70;
+
+async function removeBackground(inputPath, outPath, opts = {}) {
   const { data, info } = await sharp(inputPath)
     .ensureAlpha()
     .raw()
@@ -60,6 +65,21 @@ async function removeBackground(inputPath, outPath) {
     visited[p] = 1;
     data[i + 3] = 0;
     stack.push(x + 1, y, x - 1, y, x, y + 1, x, y - 1);
+  }
+
+  // darkMode: 残った暗い画素（濃いグレーの文字・線）を明色へ。オレンジは保持。
+  if (opts.darkMode) {
+    for (let i = 0; i < data.length; i += channels) {
+      if (data[i + 3] === 0) continue;
+      const r = data[i], g = data[i + 1], b = data[i + 2];
+      if (isOrange(r, g, b)) continue;
+      const lum = (r + g + b) / 3;
+      if (lum < 205) {
+        data[i] = 240;
+        data[i + 1] = 240;
+        data[i + 2] = 245;
+      }
+    }
   }
 
   // 境界の白いフチ（ハロー）を 1px 分やわらげる
@@ -101,7 +121,9 @@ async function main() {
   for (const asset of ASSETS) {
     const file = files.find((n) => asset.match.test(n));
     if (!file) continue;
-    await removeBackground(path.join(RAW_DIR, file), path.join(OUT_DIR, asset.out));
+    await removeBackground(path.join(RAW_DIR, file), path.join(OUT_DIR, asset.out), {
+      darkMode: asset.darkMode,
+    });
     updated[asset.key] = `/brand/${asset.out}`;
     console.log(`✓ ${file} → ${asset.out}（背景を透過しました）`);
   }

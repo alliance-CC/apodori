@@ -6,6 +6,7 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import type {
@@ -21,12 +22,18 @@ import type {
   Target,
   TargetStatus,
 } from "./types";
-import { initialState } from "./seed";
+import { emptyState, initialState } from "./seed";
 import { findExclusion, nowIso, uid } from "./utils";
 import { Logo } from "@/components/brand/Logo";
 import { LightKun } from "@/components/brand/LightKun";
 
-const KEY = "apodori_state_v1";
+export type AppMode = "demo" | "live";
+
+const KEY_MODE = "apodori_mode";
+const KEY_DEMO = "apodori_state_demo_v1";
+const KEY_LIVE = "apodori_state_live_v1";
+const keyFor = (m: AppMode) => (m === "demo" ? KEY_DEMO : KEY_LIVE);
+const seedFor = (m: AppMode) => (m === "demo" ? initialState() : emptyState());
 
 interface NewExclusionInput {
   companyName: string;
@@ -68,38 +75,81 @@ interface StoreContextValue {
     rating: "good" | "bad";
     comment?: string;
   }) => void;
-  resetDemo: () => void;
+  mode: AppMode;
+  setMode: (mode: AppMode) => void;
+  resetMode: () => void;
 }
 
 const StoreContext = createContext<StoreContextValue | null>(null);
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AppState>(() => initialState());
+  const [mode, setModeState] = useState<AppMode>("demo");
   const [mounted, setMounted] = useState(false);
+  const modeRef = useRef<AppMode>("demo");
 
-  // 初回マウントで localStorage から復元
+  // 初回マウント：モード設定と該当モードの状態を復元
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(KEY);
+      const savedMode = (localStorage.getItem(KEY_MODE) as AppMode) || "demo";
+      const m: AppMode = savedMode === "live" ? "live" : "demo";
+      modeRef.current = m;
+      setModeState(m);
+      const raw = localStorage.getItem(keyFor(m));
       if (raw) {
         const parsed = JSON.parse(raw) as AppState;
         if (parsed && parsed.version === 1) setState(parsed);
+        else setState(seedFor(m));
+      } else {
+        setState(seedFor(m));
       }
     } catch {
-      /* ignore */
+      setState(initialState());
     }
     setMounted(true);
   }, []);
 
-  // 変更を永続化
+  // 変更を現在モードのキーへ永続化
   useEffect(() => {
     if (!mounted) return;
     try {
-      localStorage.setItem(KEY, JSON.stringify(state));
+      localStorage.setItem(keyFor(mode), JSON.stringify(state));
+      localStorage.setItem(KEY_MODE, mode);
     } catch {
       /* ignore */
     }
-  }, [state, mounted]);
+  }, [state, mode, mounted]);
+
+  const setMode = useCallback((m: AppMode) => {
+    if (m === modeRef.current) return;
+    // 現在モードの状態を保存してから切り替え
+    setState((curr) => {
+      try {
+        localStorage.setItem(keyFor(modeRef.current), JSON.stringify(curr));
+      } catch {
+        /* ignore */
+      }
+      return curr;
+    });
+    modeRef.current = m;
+    setModeState(m);
+    try {
+      const raw = localStorage.getItem(keyFor(m));
+      setState(raw ? (JSON.parse(raw) as AppState) : seedFor(m));
+    } catch {
+      setState(seedFor(m));
+    }
+  }, []);
+
+  const resetMode = useCallback(() => {
+    const fresh = seedFor(modeRef.current);
+    setState(fresh);
+    try {
+      localStorage.setItem(keyFor(modeRef.current), JSON.stringify(fresh));
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   const addExclusion = useCallback((input: NewExclusionInput) => {
     setState((s) => ({
@@ -361,16 +411,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
-  const resetDemo = useCallback(() => {
-    const fresh = initialState();
-    setState(fresh);
-    try {
-      localStorage.setItem(KEY, JSON.stringify(fresh));
-    } catch {
-      /* ignore */
-    }
-  }, []);
-
   const value = useMemo<StoreContextValue>(
     () => ({
       state,
@@ -385,7 +425,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       addActivity,
       sendActivity,
       addFeedback,
-      resetDemo,
+      mode,
+      setMode,
+      resetMode,
     }),
     [
       state,
@@ -400,7 +442,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       addActivity,
       sendActivity,
       addFeedback,
-      resetDemo,
+      mode,
+      setMode,
+      resetMode,
     ]
   );
 

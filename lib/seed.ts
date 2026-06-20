@@ -1,5 +1,22 @@
 import type { AppState } from "./types";
 
+// 実データ（live）モードの初期状態。空のワークスペースから本番運用を開始する。
+export function emptyState(): AppState {
+  return {
+    version: 1,
+    lastSync: {},
+    exclusions: [],
+    campaigns: [],
+    targets: [],
+    activities: [],
+    replies: [],
+    deals: [],
+    feedbacks: [],
+    syncLogs: [],
+    kpi: [],
+  };
+}
+
 // すべて固定日時。ハイドレーション差異を避けるため動的な now() は使わない。
 export function initialState(): AppState {
   return {

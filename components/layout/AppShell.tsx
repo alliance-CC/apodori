@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { Menu, X, RotateCcw } from "lucide-react";
+import { Menu, X, RotateCcw, FlaskConical, Briefcase } from "lucide-react";
 import clsx from "clsx";
 import { Sidebar } from "./Sidebar";
 import { Logo } from "@/components/brand/Logo";
@@ -23,7 +23,7 @@ const titles: Record<string, string> = {
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
-  const { resetDemo } = useStore();
+  const { mode, setMode, resetMode } = useStore();
 
   const title =
     Object.entries(titles).find(([href]) =>
@@ -79,21 +79,59 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Menu className="h-5 w-5" />
           </button>
           <div className="lg:hidden">
-            <Logo className="h-6 w-auto" />
+            <Logo className="h-8 w-auto" />
           </div>
           <h1 className="hidden text-base font-semibold text-ink-50 lg:block">
             {title}
           </h1>
           <div className="ml-auto flex items-center gap-2">
+            {/* デモ / 実データ モード切替 */}
+            <div className="flex items-center rounded-xl border border-ink-700 bg-ink-900/70 p-0.5">
+              <button
+                onClick={() => setMode("demo")}
+                className={clsx(
+                  "flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors",
+                  mode === "demo"
+                    ? "bg-brand-gradient text-white shadow-glow"
+                    : "text-ink-300 hover:text-ink-100"
+                )}
+                title="デモデータ（サンプル）"
+              >
+                <FlaskConical className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">デモ</span>
+              </button>
+              <button
+                onClick={() => setMode("live")}
+                className={clsx(
+                  "flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors",
+                  mode === "live"
+                    ? "bg-emerald-500 text-white"
+                    : "text-ink-300 hover:text-ink-100"
+                )}
+                title="実データ（本番運用）"
+              >
+                <Briefcase className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">実データ</span>
+              </button>
+            </div>
+
             <button
               onClick={() => {
-                if (confirm("デモデータを初期状態に戻しますか？")) resetDemo();
+                if (mode === "demo") {
+                  if (confirm("デモデータを初期状態に戻しますか？（実データには影響しません）"))
+                    resetMode();
+                } else {
+                  if (confirm("実データをすべて削除しますか？この操作は元に戻せません。"))
+                    resetMode();
+                }
               }}
-              className="btn-ghost px-3 py-1.5 text-xs"
-              title="デモデータを初期化"
+              className="btn-ghost px-2.5 py-1.5 text-xs"
+              title={mode === "demo" ? "デモデータを初期化" : "実データを全削除"}
             >
               <RotateCcw className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">デモをリセット</span>
+              <span className="hidden md:inline">
+                {mode === "demo" ? "デモをリセット" : "実データをクリア"}
+              </span>
             </button>
           </div>
         </header>

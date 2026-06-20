@@ -64,11 +64,29 @@ npm run build && npm run start
 | `ANTHROPIC_API_KEY` | 設定すると Claude が営業文面を生成（未設定はテンプレート） |
 | `ANTHROPIC_MODEL` | 既定 `claude-opus-4-8`。コスト重視なら `claude-haiku-4-5` 等に変更可 |
 
-## デプロイ（無料）
+## ウェブで使う（無料デプロイ）
 
-1. このリポジトリを **Vercel** にインポート
-2. （任意）環境変数 `ANTHROPIC_API_KEY` を設定
-3. Deploy — 追加コストなしで公開できます
+最も簡単な方法は **Vercel（無料枠）** へのデプロイです。
+
+1. **PR をマージ**して、アプリ本体を `main` ブランチに取り込む
+   （`main` は初期化用の空コミットのみのため、先にマージが必要です）
+2. [vercel.com](https://vercel.com) に **GitHubアカウントで登録**（無料）
+3. **Add New → Project** から `alliance-CC/apodori` をインポート
+   （フレームワークは Next.js が自動検出されます。設定変更は不要）
+4. （任意）**Environment Variables** に `ANTHROPIC_API_KEY` を追加すると、
+   文面生成が Claude になります（未設定でもテンプレートで動作）
+5. **Deploy** → `https://〇〇.vercel.app` の URL が発行され、スマホ・PCの
+   ブラウザからそのまま利用できます（データはブラウザ内に保存・DB不要）
+
+> PR をマージせずに試したい場合は、Vercel の **Production Branch** を
+> `claude/dazzling-knuth-rq3c92` に設定すれば、そのブランチをデプロイできます。
+
+### ローカルで試す
+
+```bash
+npm install
+npm run dev   # http://localhost:3000
+```
 
 ## ブランドアセットについて（重要）
 

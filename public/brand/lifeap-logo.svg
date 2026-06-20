@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 100" width="360" height="100" role="img" aria-label="LIFE AP">
+  <!-- mark -->
+  <g transform="translate(50 50) scale(0.82)" stroke-linejoin="round">
+    <path d="M4 -6 L24 -6 L24 -14 L42 0 L24 14 L24 6 L4 6 Z" fill="#7A818C" transform="rotate(45)"/>
+    <path d="M4 -6 L24 -6 L24 -14 L42 0 L24 14 L24 6 L4 6 Z" fill="#F2570C" transform="rotate(-135)"/>
+  </g>
+  <!-- wordmark: LIFE（白）＋ A（オレンジ）＋ P（白） -->
+  <text x="104" y="64" font-family="Arial, Helvetica, sans-serif" font-size="46" font-weight="700" letter-spacing="3" fill="#F6F6F7">LIFE<tspan fill="#FF6A13"> A</tspan>P</text>
+</svg>

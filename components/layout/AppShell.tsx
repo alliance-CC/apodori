@@ -13,6 +13,7 @@ const titles: Record<string, string> = {
   "/exclusions": "除外リスト管理",
   "/lists": "リスト管理",
   "/campaigns": "キャンペーン管理",
+  "/products": "商材管理",
   "/outreach": "アプローチ実行",
   "/activities": "活動管理",
   "/analytics": "分析レポート",

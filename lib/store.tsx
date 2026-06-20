@@ -18,6 +18,7 @@ import type {
   Exclusion,
   ExclusionType,
   Feedback,
+  Product,
   ProductType,
   Target,
   TargetStatus,
@@ -60,6 +61,15 @@ interface StoreContextValue {
     targetCriteria: string;
   }) => void;
   setCampaignStatus: (id: string, status: CampaignStatus) => void;
+  addProduct: (input: {
+    name: string;
+    category: ProductType;
+    summary: string;
+    points: string;
+    materialUrl?: string;
+  }) => void;
+  updateProduct: (id: string, patch: Partial<Omit<Product, "id" | "createdAt">>) => void;
+  removeProduct: (id: string) => void;
   addActivity: (input: {
     targetId: string;
     campaignId: string;
@@ -300,6 +310,36 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }));
   }, []);
 
+  const addProduct = useCallback(
+    (input: { name: string; category: ProductType; summary: string; points: string; materialUrl?: string }) => {
+      const product: Product = {
+        id: uid("p"),
+        name: input.name,
+        category: input.category,
+        summary: input.summary,
+        points: input.points,
+        materialUrl: input.materialUrl,
+        createdAt: nowIso(),
+      };
+      setState((s) => ({ ...s, products: [...s.products, product] }));
+    },
+    []
+  );
+
+  const updateProduct = useCallback(
+    (id: string, patch: Partial<Omit<Product, "id" | "createdAt">>) => {
+      setState((s) => ({
+        ...s,
+        products: s.products.map((p) => (p.id === id ? { ...p, ...patch } : p)),
+      }));
+    },
+    []
+  );
+
+  const removeProduct = useCallback((id: string) => {
+    setState((s) => ({ ...s, products: s.products.filter((p) => p.id !== id) }));
+  }, []);
+
   const addActivity = useCallback(
     (input: {
       targetId: string;
@@ -422,6 +462,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       setTargetStatus,
       addCampaign,
       setCampaignStatus,
+      addProduct,
+      updateProduct,
+      removeProduct,
       addActivity,
       sendActivity,
       addFeedback,
@@ -439,6 +482,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       setTargetStatus,
       addCampaign,
       setCampaignStatus,
+      addProduct,
+      updateProduct,
+      removeProduct,
       addActivity,
       sendActivity,
       addFeedback,

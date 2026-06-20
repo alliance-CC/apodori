@@ -57,6 +57,17 @@ export interface Target {
 export type CampaignStatus = "draft" | "review" | "running" | "paused" | "done";
 export type ProductType = "lifeline" | "option" | "bundle";
 
+// 商材（提案商材）。資料・訴求ポイントを格納し、文面生成で利用する。
+export interface Product {
+  id: string;
+  name: string; // 商材名
+  category: ProductType; // 種別
+  summary: string; // 概要・説明
+  points: string; // 訴求ポイント（改行区切り）
+  materialUrl?: string; // 資料リンク（PDF / ドライブ等）
+  createdAt: string;
+}
+
 export interface Campaign {
   id: string;
   name: string;
@@ -145,6 +156,7 @@ export interface DailyKpi {
 export interface AppState {
   version: number;
   exclusions: Exclusion[];
+  products: Product[];
   campaigns: Campaign[];
   targets: Target[];
   activities: Activity[];

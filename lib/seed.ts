@@ -6,6 +6,7 @@ export function emptyState(): AppState {
     version: 1,
     lastSync: {},
     exclusions: [],
+    products: [],
     campaigns: [],
     targets: [],
     activities: [],
@@ -25,6 +26,40 @@ export function initialState(): AppState {
       salesforce: "2026-06-20T06:00:00.000Z",
       sheets: "2026-06-20T06:00:00.000Z",
     },
+    products: [
+      pr(
+        "p1",
+        "電気取次（新電力）",
+        "lifeline",
+        "新規入居者の電気契約を当社経由でお申し込み。面倒な手続きを代行し、御社の事務負担をかけずに入居後の開通をスムーズにします。",
+        "入居者の開通手続きを一括代行\n御社の工数ゼロ\nご紹介実績に応じた手数料還元\n大手電力より割安なプランも提案可",
+        "https://example.com/docs/denki.pdf"
+      ),
+      pr(
+        "p2",
+        "都市ガス・LPガス取次",
+        "lifeline",
+        "電気とセットでガスの開栓申し込みも代行。引越し時のライフライン手続きをまとめて完結できます。",
+        "電気とセットで開栓申込を代行\n引越し当日の立会い調整までサポート\nセット契約で入居者の割引メリット",
+        "https://example.com/docs/gas.pdf"
+      ),
+      pr(
+        "p3",
+        "インターネット回線取次",
+        "lifeline",
+        "光回線・モバイルWi-Fiの申し込みを代行。単身・学生入居者の高い開通ニーズに対応します。",
+        "光回線/モバイルWi-Fiの申込代行\n単身・学生物件と相性が良い\n開通までの進捗を可視化",
+        "https://example.com/docs/internet.pdf"
+      ),
+      pr(
+        "p4",
+        "新生活オプションパック",
+        "option",
+        "入居者向けの引越し・家財保険・ハウスクリーニング等のオプションをまとめてご案内。付加価値提案で満足度を向上。",
+        "引越し/家財保険/クリーニングを一括案内\n入居者満足度の向上\n客単価アップと手数料還元",
+        "https://example.com/docs/option.pdf"
+      ),
+    ],
     exclusions: [
       ex("ex1", "株式会社ハウスメイト関東", "ハウスメイト 品川店", "info@housemate-kanto.co.jp", "03-1234-5678", "東京都品川区東品川2-1-1", "contracted", "salesforce", "契約中（電気・ガス取次）"),
       ex("ex2", "ニュートラル不動産株式会社", "ニュートラル 吉祥寺店", "contact@neutral-fudosan.jp", "0422-22-3344", "東京都武蔵野市吉祥寺本町1-2-3", "contracted", "salesforce", "契約中"),
@@ -135,6 +170,9 @@ function ex(
 }
 function cp(id: string, name: string, status: any, productType: any, area: string, targetCriteria: string) {
   return { id, name, status, productType, area, targetCriteria, createdAt: "2026-06-05T00:00:00.000Z" };
+}
+function pr(id: string, name: string, category: any, summary: string, points: string, materialUrl?: string) {
+  return { id, name, category, summary, points, materialUrl, createdAt: "2026-06-03T00:00:00.000Z" };
 }
 function tg(
   id: string,

@@ -5,7 +5,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Mascot } from "@/components/brand/Mascot";
 
 export const metadata: Metadata = {
-  title: "appointment AP｜営業AIエージェント（株式会社ライフアップ）",
+  title: "Appointment AP｜営業AIエージェント（株式会社ライフアップ）",
   description:
     "ターゲットリストを渡すだけで、AIエージェントが専属インサイドセールスとして商談獲得まで自律実行。株式会社ライフアップの営業AIエージェント。",
   applicationName: "営業AIエージェント",

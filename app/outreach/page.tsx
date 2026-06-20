@@ -31,6 +31,7 @@ export default function OutreachPage() {
 
   const [selectedId, setSelectedId] = useState<string>(candidates[0]?.id ?? "");
   const [variant, setVariant] = useState<"A" | "B">("A");
+  const [productId, setProductId] = useState<string>("");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [source, setSource] = useState<"ai" | "template" | null>(null);
@@ -42,6 +43,11 @@ export default function OutreachPage() {
   const campaign = target ? state.campaigns.find((c) => c.id === target.campaignId) : undefined;
   const productType = campaign?.productType ?? "lifeline";
 
+  const defaultProductId =
+    (state.products.find((p) => p.category === productType) || state.products[0])?.id || "";
+  const activeProductId = productId || defaultProductId;
+  const activeProduct = state.products.find((p) => p.id === activeProductId);
+
   async function generate() {
     if (!target) return;
     setLoading(true);
@@ -52,6 +58,9 @@ export default function OutreachPage() {
       storeName: target.storeName,
       contactName: target.contactName,
       productType,
+      productName: activeProduct?.name,
+      productSummary: activeProduct?.summary,
+      productPoints: activeProduct?.points,
       area: campaign?.area,
       variant,
     };
@@ -129,6 +138,32 @@ export default function OutreachPage() {
                   <div className="flex justify-between"><span className="text-ink-400">スコア</span><span className="font-semibold text-ink-100">{target.score}</span></div>
                 </div>
               )}
+
+              <div className="mt-3">
+                <label className="label">商材を選択</label>
+                <select
+                  className="input"
+                  value={activeProductId}
+                  onChange={(e) => setProductId(e.target.value)}
+                >
+                  {state.products.length === 0 && <option value="">（商材未登録）</option>}
+                  {state.products.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+                {state.products.length === 0 ? (
+                  <p className="mt-1 text-[11px] text-ink-500">
+                    <a href="/products" className="text-brand-300 underline">
+                      商材管理
+                    </a>
+                    で商材を登録すると、文面に資料の内容が反映されます。
+                  </p>
+                ) : activeProduct?.summary ? (
+                  <p className="mt-1 line-clamp-2 text-[11px] text-ink-500">{activeProduct.summary}</p>
+                ) : null}
+              </div>
 
               <div className="mt-3">
                 <label className="label">文面パターン（A/Bテスト）</label>

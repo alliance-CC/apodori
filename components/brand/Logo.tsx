@@ -20,7 +20,7 @@ export function Logo({
       // eslint-disable-next-line @next/next/no-img-element
       <img
         src={BRAND.mark}
-        alt="appointment AP"
+        alt="Appointment AP"
         className={clsx("select-none", className)}
         draggable={false}
       />
@@ -29,13 +29,13 @@ export function Logo({
 
   return (
     <span
-      aria-label="appointment AP"
+      aria-label="Appointment AP"
       className={clsx(
         "select-none whitespace-nowrap font-extrabold leading-none tracking-tight",
         className
       )}
     >
-      <span className="text-ink-50">appointment</span>
+      <span className="text-ink-50">Appointment</span>
       <span className="text-brand-500">&nbsp;A</span>
       <span className="text-ink-50">P</span>
     </span>

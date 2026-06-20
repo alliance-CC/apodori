@@ -36,9 +36,9 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       <Link
         href="/"
         onClick={onNavigate}
-        className="mb-2 flex items-center gap-2 rounded-xl px-2 py-2"
+        className="mb-2 flex items-center gap-2 rounded-xl px-2 py-3"
       >
-        <Logo className="h-10 w-auto" />
+        <Logo className="text-xl" />
       </Link>
 
       <nav className="flex flex-1 flex-col gap-1">

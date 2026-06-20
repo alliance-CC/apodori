@@ -27,9 +27,9 @@ export default function SettingsPage() {
 
           <div className="space-y-4">
             <div>
-              <p className="label">ロゴ（背景透過 SVG）</p>
+              <p className="label">ロゴ（テキスト・常に高画質）</p>
               <div className="flex items-center gap-4 rounded-xl border border-ink-800 bg-ink-950/60 p-4">
-                <Logo className="h-8 w-auto" />
+                <Logo className="text-2xl" />
                 <Logo variant="mark" className="h-9 w-9" />
               </div>
             </div>

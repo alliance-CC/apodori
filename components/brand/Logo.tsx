@@ -2,8 +2,11 @@ import clsx from "clsx";
 import { BRAND } from "@/lib/brand";
 
 /**
- * LIFE AP ロゴ。公式アセットへの差し替えは public/brand/raw/ に画像を置いて
- * `npm run brand:transparent` を実行するだけ（背景透過＋自動配線）。
+ * ロゴ。
+ * - "full"（既定）: テキストのワードマーク「appointment AP」（A はオレンジ）。
+ *   画像ではなくテキストなので、どのサイズでも常にくっきり表示されます。
+ *   サイズは className のフォントサイズ（例: text-xl / text-2xl）で指定します。
+ * - "mark": マーク画像（ファビコン等のアイコン用途）。
  */
 export function Logo({
   variant = "full",
@@ -12,14 +15,29 @@ export function Logo({
   variant?: "full" | "mark";
   className?: string;
 }) {
-  const src = variant === "mark" ? BRAND.mark : BRAND.logo;
+  if (variant === "mark") {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={BRAND.mark}
+        alt="appointment AP"
+        className={clsx("select-none", className)}
+        draggable={false}
+      />
+    );
+  }
+
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={src}
-      alt="株式会社ライフアップ｜LIFE AP"
-      className={clsx("select-none", className)}
-      draggable={false}
-    />
+    <span
+      aria-label="appointment AP"
+      className={clsx(
+        "select-none whitespace-nowrap font-extrabold leading-none tracking-tight",
+        className
+      )}
+    >
+      <span className="text-ink-50">appointment</span>
+      <span className="text-brand-500">&nbsp;A</span>
+      <span className="text-ink-50">P</span>
+    </span>
   );
 }

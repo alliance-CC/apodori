@@ -451,7 +451,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   if (!mounted) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-ink-950 bg-ink-radial">
-        <Logo className="h-10 w-auto opacity-90" />
+        <Logo className="text-2xl opacity-90" />
         <LightKun className="h-28 w-auto animate-float" />
         <div className="flex items-center gap-2 text-sm text-ink-300">
           <span className="h-2 w-2 animate-ping rounded-full bg-brand-500" />

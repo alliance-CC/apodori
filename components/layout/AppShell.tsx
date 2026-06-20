@@ -79,7 +79,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Menu className="h-5 w-5" />
           </button>
           <div className="lg:hidden">
-            <Logo className="h-8 w-auto" />
+            <Logo className="text-lg" />
           </div>
           <h1 className="hidden text-base font-semibold text-ink-50 lg:block">
             {title}

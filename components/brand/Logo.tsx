@@ -35,7 +35,8 @@ export function Logo({
         className
       )}
     >
-      <span className="text-ink-50">Appointment</span>
+      <span className="text-brand-500">A</span>
+      <span className="text-ink-50">ppointment</span>
       <span className="text-brand-500">&nbsp;A</span>
       <span className="text-ink-50">P</span>
     </span>

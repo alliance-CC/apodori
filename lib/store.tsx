@@ -54,6 +54,26 @@ interface StoreContextValue {
   runSync: (source: "salesforce" | "sheets") => void;
   runExclusionCheck: (campaignId?: string) => { checked: number; excluded: number };
   setTargetStatus: (id: string, status: TargetStatus) => void;
+  addTarget: (input: {
+    campaignId: string;
+    companyName: string;
+    storeName?: string;
+    contactName?: string;
+    contactEmail?: string;
+    phone?: string;
+    score?: number;
+    researchSummary?: string;
+  }) => Target;
+  importTargets: (
+    campaignId: string,
+    rows: {
+      companyName: string;
+      storeName?: string;
+      contactName?: string;
+      contactEmail?: string;
+      phone?: string;
+    }[]
+  ) => { added: number; excluded: number };
   addCampaign: (input: {
     name: string;
     productType: ProductType;
@@ -97,6 +117,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [mode, setModeState] = useState<AppMode>("demo");
   const [mounted, setMounted] = useState(false);
   const modeRef = useRef<AppMode>("demo");
+  const stateRef = useRef(state);
+  stateRef.current = state;
 
   // 初回マウント：モード設定と該当モードの状態を復元
   useEffect(() => {
@@ -287,6 +309,71 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }));
   }, []);
 
+  const buildTarget = (
+    campaignId: string,
+    r: { companyName: string; storeName?: string; contactName?: string; contactEmail?: string; phone?: string; score?: number; researchSummary?: string }
+  ): { target: Target; excluded: boolean } => {
+    const hit = findExclusion(
+      { companyName: r.companyName, storeName: r.storeName, contactEmail: r.contactEmail, phone: r.phone },
+      stateRef.current.exclusions
+    );
+    const target: Target = {
+      id: uid("t"),
+      campaignId,
+      companyName: r.companyName,
+      storeName: r.storeName,
+      url: undefined,
+      contactEmail: r.contactEmail,
+      contactName: r.contactName,
+      industry: "不動産仲介・管理",
+      size: "—",
+      prefecture: "—",
+      status: hit ? "excluded" : "pending",
+      score: r.score ?? 60 + Math.floor(Math.random() * 36),
+      researchSummary: r.researchSummary || "",
+      exclusionCheckAt: nowIso(),
+      excludedReason: hit ? `${hit.exclusion.companyName}（${hit.field}一致）` : undefined,
+      createdAt: nowIso(),
+    };
+    return { target, excluded: !!hit };
+  };
+
+  const addTarget = useCallback((input: {
+    campaignId: string;
+    companyName: string;
+    storeName?: string;
+    contactName?: string;
+    contactEmail?: string;
+    phone?: string;
+    score?: number;
+    researchSummary?: string;
+  }) => {
+    const { target } = buildTarget(input.campaignId, input);
+    setState((s) => ({ ...s, targets: [target, ...s.targets] }));
+    return target;
+  }, []);
+
+  const importTargets = useCallback(
+    (
+      campaignId: string,
+      rows: { companyName: string; storeName?: string; contactName?: string; contactEmail?: string; phone?: string }[]
+    ) => {
+      let added = 0;
+      let excluded = 0;
+      const created: Target[] = [];
+      for (const r of rows) {
+        if (!r.companyName) continue;
+        const { target, excluded: ex } = buildTarget(campaignId, r);
+        created.push(target);
+        added++;
+        if (ex) excluded++;
+      }
+      if (created.length) setState((s) => ({ ...s, targets: [...created, ...s.targets] }));
+      return { added, excluded };
+    },
+    []
+  );
+
   const addCampaign = useCallback(
     (input: { name: string; productType: ProductType; area: string; targetCriteria: string }) => {
       const campaign: Campaign = {
@@ -460,6 +547,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       runSync,
       runExclusionCheck,
       setTargetStatus,
+      addTarget,
+      importTargets,
       addCampaign,
       setCampaignStatus,
       addProduct,
@@ -480,6 +569,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       runSync,
       runExclusionCheck,
       setTargetStatus,
+      addTarget,
+      importTargets,
       addCampaign,
       setCampaignStatus,
       addProduct,

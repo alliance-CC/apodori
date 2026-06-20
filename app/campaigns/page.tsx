@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Play, Pause, Target as TargetIcon } from "lucide-react";
+import { Plus, Play, Pause, Target as TargetIcon, Zap, Loader2, Check } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { Badge, PageHeader, GuideBanner } from "@/components/ui";
 import { campaignStatusLabel, productTypeLabel, fmtDate } from "@/lib/utils";
@@ -16,8 +16,72 @@ const statusTone: Record<string, "neutral" | "brand" | "green" | "yellow"> = {
 };
 
 export default function CampaignsPage() {
-  const { state, addCampaign, setCampaignStatus } = useStore();
+  const { state, addCampaign, setCampaignStatus, runExclusionCheck, addActivity, sendActivity } = useStore();
   const [open, setOpen] = useState(false);
+  const [auto, setAuto] = useState<{
+    id: string;
+    total: number;
+    done: number;
+    sent: number;
+    blocked: number;
+    finished: boolean;
+  } | null>(null);
+
+  // キャンペーンの自動実行（オートパイロット）：
+  // 除外チェック → 文面生成 → 送信直前の最終照合 → 送信/ブロック を全リードに自動適用
+  async function autoRun(campaignId: string) {
+    if (auto && !auto.finished) return;
+    runExclusionCheck(campaignId);
+    const ready = state.targets.filter(
+      (t) => t.campaignId === campaignId && (t.status === "pending" || t.status === "approved")
+    );
+    if (ready.length === 0) {
+      setAuto({ id: campaignId, total: 0, done: 0, sent: 0, blocked: 0, finished: true });
+      setTimeout(() => setAuto(null), 5000);
+      return;
+    }
+    const campaign = state.campaigns.find((c) => c.id === campaignId);
+    const product =
+      state.products.find((p) => p.category === campaign?.productType) || state.products[0];
+    setAuto({ id: campaignId, total: ready.length, done: 0, sent: 0, blocked: 0, finished: false });
+    let sent = 0;
+    let blocked = 0;
+    let done = 0;
+    for (const t of ready) {
+      let subject = "";
+      let body = "";
+      try {
+        const res = await fetch("/api/generate", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            companyName: t.companyName,
+            storeName: t.storeName,
+            contactName: t.contactName,
+            productType: campaign?.productType ?? "lifeline",
+            productName: product?.name,
+            productSummary: product?.summary,
+            productPoints: product?.points,
+            area: campaign?.area,
+            variant: "A",
+          }),
+        });
+        const data = await res.json();
+        subject = data.subject;
+        body = data.body;
+      } catch {
+        subject = `【ご提案】${t.companyName}様へ`;
+        body = "";
+      }
+      const activity = addActivity({ targetId: t.id, campaignId, channel: "email", subject, body, variant: "A" });
+      const r = sendActivity(activity.id);
+      if (r.ok) sent++;
+      else blocked++;
+      done++;
+      setAuto({ id: campaignId, total: ready.length, done, sent, blocked, finished: done === ready.length });
+    }
+    setTimeout(() => setAuto(null), 8000);
+  }
   const [form, setForm] = useState({
     name: "",
     productType: "lifeline" as ProductType,
@@ -50,7 +114,9 @@ export default function CampaignsPage() {
       </PageHeader>
 
       <GuideBanner>
-        キャンペーンごとに対象エリアや商材を分けて運用できるよ🎯 「稼働中」にするとアプローチが始まるんだ。
+        「<span className="font-semibold text-brand-300">自動実行</span>」を押すと、そのキャンペーンのリードに対して
+        <span className="font-semibold text-brand-300">文面生成→除外照合→送信</span>を自動で一括処理するよ⚡
+        （デモでは送信は擬似的に記録。実際のメール送信は配信サービス連携で有効化できます）
       </GuideBanner>
 
       {open && (
@@ -104,16 +170,54 @@ export default function CampaignsPage() {
                     <p className="mt-1 text-xs text-ink-500">条件：{c.targetCriteria}</p>
                   )}
                 </div>
-                {c.status === "running" ? (
-                  <button onClick={() => setCampaignStatus(c.id, "paused")} className="btn-ghost px-3 py-1.5 text-xs">
-                    <Pause className="h-3.5 w-3.5" /> 停止
+                <div className="flex shrink-0 flex-col gap-2">
+                  {c.status === "running" ? (
+                    <button onClick={() => setCampaignStatus(c.id, "paused")} className="btn-ghost px-3 py-1.5 text-xs">
+                      <Pause className="h-3.5 w-3.5" /> 停止
+                    </button>
+                  ) : (
+                    <button onClick={() => setCampaignStatus(c.id, "running")} className="btn-primary px-3 py-1.5 text-xs">
+                      <Play className="h-3.5 w-3.5" /> 稼働
+                    </button>
+                  )}
+                  <button
+                    onClick={() => autoRun(c.id)}
+                    disabled={!!auto && !auto.finished}
+                    className="btn-ghost border-brand-500/40 px-3 py-1.5 text-xs text-brand-200 disabled:opacity-50"
+                    title="このキャンペーンのリードに自動でアプローチ"
+                  >
+                    {auto?.id === c.id && !auto.finished ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Zap className="h-3.5 w-3.5" />
+                    )}
+                    自動実行
                   </button>
-                ) : (
-                  <button onClick={() => setCampaignStatus(c.id, "running")} className="btn-primary px-3 py-1.5 text-xs">
-                    <Play className="h-3.5 w-3.5" /> 稼働
-                  </button>
-                )}
+                </div>
               </div>
+
+              {auto?.id === c.id && (
+                <div className="mt-3 rounded-xl border border-brand-500/30 bg-brand-500/[0.06] p-3 text-xs">
+                  {auto.finished ? (
+                    <p className="flex items-center gap-1.5 text-emerald-300">
+                      <Check className="h-3.5 w-3.5" /> 自動実行 完了：送信 {auto.sent} 件／ブロック {auto.blocked} 件
+                      {auto.total === 0 && "（対象リードなし）"}
+                    </p>
+                  ) : (
+                    <>
+                      <p className="text-brand-200">
+                        オートパイロット稼働中… {auto.done}/{auto.total}（文面生成 → 除外照合 → 送信）
+                      </p>
+                      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-ink-800">
+                        <div
+                          className="h-full bg-brand-gradient transition-all"
+                          style={{ width: `${auto.total ? (auto.done / auto.total) * 100 : 0}%` }}
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
 
               <div className="mt-4 grid grid-cols-4 gap-2 text-center">
                 <Mini label="対象" value={targets.length} icon={<TargetIcon className="h-3.5 w-3.5" />} />

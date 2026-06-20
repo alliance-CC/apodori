@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ShieldCheck, Search, Check, Ban, Star } from "lucide-react";
+import { ShieldCheck, Search, Check, Ban, Star, UserPlus, Upload, X } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { Badge, PageHeader, GuideBanner } from "@/components/ui";
 import { targetStatusLabel } from "@/lib/utils";
@@ -18,11 +18,60 @@ const statusTone: Record<string, "neutral" | "brand" | "green" | "red" | "yellow
 };
 
 export default function ListsPage() {
-  const { state, runExclusionCheck, setTargetStatus } = useStore();
+  const { state, runExclusionCheck, setTargetStatus, addTarget, importTargets } = useStore();
   const [campaign, setCampaign] = useState("all");
   const [status, setStatus] = useState("all");
   const [q, setQ] = useState("");
   const [result, setResult] = useState<string | null>(null);
+  const [showAdd, setShowAdd] = useState(false);
+  const [showCsv, setShowCsv] = useState(false);
+  const defaultCampaignId =
+    campaign !== "all" ? campaign : state.campaigns[0]?.id ?? "";
+  const [lead, setLead] = useState({
+    campaignId: defaultCampaignId,
+    companyName: "",
+    storeName: "",
+    contactName: "",
+    contactEmail: "",
+  });
+  const [csv, setCsv] = useState("");
+  const [csvCampaign, setCsvCampaign] = useState(defaultCampaignId);
+
+  function submitLead(e: React.FormEvent) {
+    e.preventDefault();
+    if (!lead.companyName.trim() || !lead.campaignId) return;
+    const t = addTarget({
+      campaignId: lead.campaignId,
+      companyName: lead.companyName.trim(),
+      storeName: lead.storeName.trim() || undefined,
+      contactName: lead.contactName.trim() || undefined,
+      contactEmail: lead.contactEmail.trim() || undefined,
+    });
+    setLead({ ...lead, companyName: "", storeName: "", contactName: "", contactEmail: "" });
+    setShowAdd(false);
+    setResult(
+      t.status === "excluded"
+        ? `「${t.companyName}」を追加しましたが、除外リストと一致したため自動で除外しました。`
+        : `「${t.companyName}」をリードに追加しました。`
+    );
+  }
+
+  function submitCsv() {
+    if (!csvCampaign) return;
+    const rows = csv
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean)
+      .map((line) => {
+        const [companyName, storeName, contactName, contactEmail, phone] = line.split(",").map((s) => s?.trim());
+        return { companyName, storeName, contactName, contactEmail, phone };
+      })
+      .filter((r) => r.companyName);
+    const res = importTargets(csvCampaign, rows);
+    setCsv("");
+    setShowCsv(false);
+    setResult(`${res.added} 件のリードを取り込みました（うち ${res.excluded} 件は除外リストと一致し自動除外）。`);
+  }
 
   const filtered = useMemo(() => {
     return state.targets
@@ -80,7 +129,74 @@ export default function ListsPage() {
             <option key={k} value={k}>{v}</option>
           ))}
         </select>
+        <div className="ml-auto flex gap-2">
+          <button onClick={() => { setShowCsv((v) => !v); setShowAdd(false); setCsvCampaign(defaultCampaignId); }} className="btn-ghost">
+            <Upload className="h-4 w-4" /> CSV取込
+          </button>
+          <button onClick={() => { setShowAdd((v) => !v); setShowCsv(false); setLead((l) => ({ ...l, campaignId: defaultCampaignId })); }} className="btn-primary">
+            <UserPlus className="h-4 w-4" /> リード追加
+          </button>
+        </div>
       </div>
+
+      {state.campaigns.length === 0 && (showAdd || showCsv) && (
+        <div className="mb-4 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+          先に「キャンペーン」を作成してください。リードはキャンペーンに紐づけて登録します。
+        </div>
+      )}
+
+      {showAdd && state.campaigns.length > 0 && (
+        <form onSubmit={submitLead} className="card mb-4 grid gap-3 p-4 sm:grid-cols-2">
+          <div className="flex items-center justify-between sm:col-span-2">
+            <h3 className="text-sm font-semibold text-ink-100">リードを追加</h3>
+            <button type="button" onClick={() => setShowAdd(false)} className="rounded-lg p-1 text-ink-400 hover:bg-ink-800"><X className="h-4 w-4" /></button>
+          </div>
+          <div>
+            <label className="label">キャンペーン</label>
+            <select className="input" value={lead.campaignId} onChange={(e) => setLead({ ...lead, campaignId: e.target.value })}>
+              {state.campaigns.map((c) => (<option key={c.id} value={c.id}>{c.name}</option>))}
+            </select>
+          </div>
+          <div>
+            <label className="label">法人名 *</label>
+            <input className="input" value={lead.companyName} onChange={(e) => setLead({ ...lead, companyName: e.target.value })} placeholder="株式会社〇〇不動産" required />
+          </div>
+          <div>
+            <label className="label">店舗名</label>
+            <input className="input" value={lead.storeName} onChange={(e) => setLead({ ...lead, storeName: e.target.value })} placeholder="〇〇店" />
+          </div>
+          <div>
+            <label className="label">担当者</label>
+            <input className="input" value={lead.contactName} onChange={(e) => setLead({ ...lead, contactName: e.target.value })} placeholder="山田 太郎" />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="label">メールアドレス</label>
+            <input className="input" value={lead.contactEmail} onChange={(e) => setLead({ ...lead, contactEmail: e.target.value })} placeholder="info@example.co.jp" />
+          </div>
+          <div className="flex gap-2 sm:col-span-2">
+            <button type="submit" className="btn-primary">追加（自動で除外チェック）</button>
+            <button type="button" onClick={() => setShowAdd(false)} className="btn-ghost">キャンセル</button>
+          </div>
+        </form>
+      )}
+
+      {showCsv && state.campaigns.length > 0 && (
+        <div className="card mb-4 p-4">
+          <div className="mb-2 flex items-center gap-3">
+            <h3 className="text-sm font-semibold text-ink-100">CSVでリード一括取込</h3>
+            <select className="input w-auto" value={csvCampaign} onChange={(e) => setCsvCampaign(e.target.value)}>
+              {state.campaigns.map((c) => (<option key={c.id} value={c.id}>{c.name}</option>))}
+            </select>
+          </div>
+          <p className="mb-2 text-xs text-ink-400">1行1件。形式： <code className="text-ink-200">法人名,店舗名,担当者,メール,電話</code></p>
+          <textarea value={csv} onChange={(e) => setCsv(e.target.value)} rows={5} className="input font-mono text-xs"
+            placeholder={"株式会社サンプル不動産,渋谷店,佐藤,info@sample.jp,03-1111-2222"} />
+          <div className="mt-2 flex gap-2">
+            <button onClick={submitCsv} className="btn-primary">取り込む（自動で除外チェック）</button>
+            <button onClick={() => setShowCsv(false)} className="btn-ghost">キャンセル</button>
+          </div>
+        </div>
+      )}
 
       <div className="grid gap-3 lg:grid-cols-2">
         {filtered.map((t) => (
